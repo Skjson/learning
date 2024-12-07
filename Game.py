@@ -96,9 +96,7 @@ actions = {
     3: lambda character: character.Fight('knight'),
     3: lambda character: character.Fight('BOSS')
 }
-# while True:
-#     # # lambda character: character.passiveRecovery()
-#     # time.sleep(1)
+
 
 def main():
     while True:
