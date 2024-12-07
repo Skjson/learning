@@ -3,7 +3,6 @@ import random
 import time
 import threading
 
-
 class Character(object):
     def __init__(self, name, HP=50, damage=10, wisdom=50, money=100, stamina = 100):
         self.name = name
