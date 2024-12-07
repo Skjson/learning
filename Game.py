@@ -97,7 +97,6 @@ actions = {
     3: lambda character: character.Fight('BOSS')
 }
 
-
 def main():
     while True:
         title = 'Выбери действие своего персонажа '
