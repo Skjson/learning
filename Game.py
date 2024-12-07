@@ -94,7 +94,7 @@ actions = {
     1: lambda character: character.Studying(),
     2: lambda character: character.Heal(10),
     3: lambda character: character.Fight('knight'),
-    3: lambda character: character.Fight('BOSS')
+    4: lambda character: character.Fight('BOSS')
 }
 
 def main():
