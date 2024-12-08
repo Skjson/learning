@@ -1,10 +1,12 @@
+from gc import get_stats
+
 from pick import pick
 import random
 import time
 import threading
 
 class Character(object):
-    def __init__(self, name, HP=50, damage=10, wisdom=50, money=100, stamina = 100):
+    def __init__(self, name, HP=50, damage=10, wisdom=50, money=100, stamina = 100, xp = 0):
         self.name = name
         self.HP = HP
         self.max_HP = HP
@@ -12,22 +14,23 @@ class Character(object):
         self.wisdom = wisdom
         self.money = money
         self.stamina = stamina
+        self.xp = xp
 
-    def run_adventure_love(self):
-        t = threading.Thread(target=self.adventure_love)
+    def run_regeneration(self):
+        t = threading.Thread(target=self.regeneration_loop)
         t.start()
-    def adventure_love(self):
+    def regeneration_loop(self):
         while True:
-            self.passiveRecovery()
+            self.regeneration()
             time.sleep(1)
 
 
     def Heal(self, amount):
         if amount > 0:
             self.HP = min(self.max_HP, self.HP + amount)
-    def passiveRecovery(self):
+    def regeneration(self):
         if self.HP < self.max_HP:
-            self.HP = min(self.max_HP, self.HP + 5)
+            self.HP = min(self.max_HP, self.HP + 1)
         if self.stamina < 100:
             self.stamina = min(self.stamina + 1, 100)
     def Training(self):
@@ -55,16 +58,16 @@ class Character(object):
             enemy_HP = 40
             enemy_damage = 20
         elif enemy_type == "BOSS":
-            enemy_HP = 40
-            enemy_damage = 20
+            enemy_HP = 120
+            enemy_damage = 30
         while self.HP > 0 and enemy_HP > 0:
             enemy_HP -= self.damage
             self.HP -= enemy_damage
         if self.HP > 0:
-            print("Win")
             self.money+=10
+            self.xp+=11
         else:
-            print("Lose")
+            print("Здесь ты проиграл!")
 
 class Stats(Character):
     def getStats(self):
@@ -75,35 +78,79 @@ class Shop(object):
         pass
 
 
+
 def characterName():
     global character_1
     name = input(f"Напиши имя для своего персонажа " + "\n")
     character_1 = Character(name)
-    print(f"Вот характеристики твоего персонажа, {name} \n ")
-    Stats.getStats(character_1)
 
 
 characterName()
+character_1.run_regeneration()
 
-character_1.run_adventure_love()
-
-
-actions = {
-    0: lambda character: character.Training(),
-    1: lambda character: character.Studying(),
-    2: lambda character: character.Heal(10),
-    3: lambda character: character.Fight('knight'),
-    4: lambda character: character.Fight('BOSS')
+enemies = {
+    0: lambda character: character.Fight('knight'),
+    1: lambda character: character.Fight('archer'),
+    2: lambda character: character.Fight('BOSS'),
 }
-
+actions = {
+    1: lambda character: character.Training(),
+    2: lambda character: character.Studying(),
+    3: lambda character: character.Heal(30),
+    # 4: lambda character: character.Fight('knight'),
+    5: lambda character: character.Fight('BOSS')
+}
+# characteristics = {
+#     0: lambda character: print('Твое максимальное ХП сейчас:', character.max_HP),
+#     2: lambda character: print('Твое максимальный урон сейчас:', character.damage),
+#     3: lambda character: print('Твоя мудрость:',character.wisdom),
+#     4: lambda character: print('Твоя энергия:',character.stamina),
+#     5: lambda character: print('Твои деньги:',character.money)
+# }
 def main():
     while True:
         title = 'Выбери действие своего персонажа '
-        options = ['Качаться', 'Учиться', 'Лечиться', 'Сражаться','Сражаться c БОССОМ']
-        option, index = pick(options, title)
-        actions[index](character_1)
-        Stats.getStats(character_1)
-        input()
+        options = ['Показать характеристики','Качаться', 'Учиться', 'Лечиться', 'Сражаться','Сражаться c БОССОМ', ]
+        option, index = pick(options, title, indicator="->")
+        if index == 0:
+            title1 = 'Твои характеристики'
+            options = [f'Здоровье: {character_1.HP}/{character_1.max_HP}',f'Урон: {character_1.damage}',
+                        f'Опыт: {character_1.xp}',''f'Энергия: {character_1.stamina}/100', f'Деньги: {character_1.money}']
+            pick(options, title1, indicator="")
+        elif index == 1:
+            title = 'Ты прокачался'
+            pick([''],title,indicator="")
+            actions[index](character_1)
+        elif index == 2:
+            title = 'Ты поучился!'
+            pick([''],title,indicator="")
+            actions[index](character_1)
+        elif index == 3:
+            title = 'Ты подлечился на 30 единиц!'
+            pick([''],title,indicator="")
+            actions[index](character_1)
+        elif index == 4:
+            title = 'Выбери с кем сразишься!'
+            options = [f'Рыцарь (50 хп / 10 урона)', f'Лучник (40 хп / 20 урона)', 'Назад' ]
+            option, index = pick(options,title,indicator="->")
+            if index != 2:
+                enemies[index](character_1)
+            else:
+                continue
+        elif index == 5:
+            title = 'Время сражаться c БОССОМ! (120 хп / 40 урона'
+            options = ['В БОЙ!', 'Назад']
+            option, ind = pick([''], title, indicator="->")
+            if index == 2:
+                enemies[index](character_1)
+            else:
+                continue
+
+
+
+
+
+
 
 if __name__ == "__main__":
     main()
